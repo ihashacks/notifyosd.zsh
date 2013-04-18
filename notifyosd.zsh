@@ -7,6 +7,7 @@ function notifyosd-precmd() {
     if [ ! -z "$cmd" -a $cmd_time -gt 10 ]; then
         notify-send -i utilities-terminal -u low "$cmd_basename completed" "\"$cmd\" took $cmd_time seconds"
     fi
+	unset cmd
 }
 
 # make sure this plays nicely with any existing precmd
