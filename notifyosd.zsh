@@ -3,9 +3,9 @@ cmdignore=(vim top htop)
 
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
-    if [[ ${cmdignore[(r)$cmd]} == $cmd ]]; then
-       return
-   else
+    if [[ ${cmdignore[(r)$cmd_basename]} == $cmd_basename ]]; then
+        return
+    else
         if [ ! -z "$cmd" ]; then
             cmd_end=`date +%s`
             ((cmd_time=$cmd_end - $cmd_start))
