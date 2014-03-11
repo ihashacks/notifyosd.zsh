@@ -1,5 +1,5 @@
 # commands to ignore
-cmdignore=(vim top htop)
+cmdignore=(htop tmux top vim)
 
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
@@ -13,14 +13,16 @@ function notifyosd-precmd() {
         fi
         if [ $retval -gt 0 ]; then
 			cmdstat="with warning"
+			sndstat="/usr/share/sounds/gnome/default/alerts/sonar.ogg"
 		else
             cmdstat="successfully"
+			sndstat="/usr/share/sounds/gnome/default/alerts/glass.ogg"
         fi
         if [ ! -z "$cmd" -a $cmd_time -gt 10 ]; then
             if [ ! -z $SSH_TTY ] ; then
-                notify-send -i utilities-terminal -u low "$cmd_basename on `hostname` completed $cmdstat" "\"$cmd\" took $cmd_time seconds";
+                notify-send -i utilities-terminal -u low "$cmd_basename on `hostname` completed $cmdstat" "\"$cmd\" took $cmd_time seconds"; play -q $sndstat
             else
-                notify-send -i utilities-terminal -u low "$cmd_basename completed $cmdstat" "\"$cmd\" took $cmd_time seconds"
+                notify-send -i utilities-terminal -u low "$cmd_basename completed $cmdstat" "\"$cmd\" took $cmd_time seconds"; play -q $sndstat
             fi
         fi
         unset cmd
