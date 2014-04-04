@@ -1,6 +1,9 @@
 # commands to ignore
 cmdignore=(htop tmux top vim)
 
+# set gt 0 to enable GNU units for time results
+gnuunits=0
+
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
 	retval=$?
@@ -9,7 +12,7 @@ function notifyosd-precmd() {
     else
         if [ ! -z "$cmd" ]; then
             cmd_end=`date +%s`
-            ((cmd_time=$cmd_end - $cmd_start))
+            ((cmd_secs=$cmd_end - $cmd_start))
         fi
         if [ $retval -gt 0 ]; then
 			cmdstat="with warning"
@@ -18,11 +21,21 @@ function notifyosd-precmd() {
             cmdstat="successfully"
 			sndstat="/usr/share/sounds/gnome/default/alerts/glass.ogg"
         fi
-        if [ ! -z "$cmd" -a $cmd_time -gt 10 ]; then
+        if [ ! -z "$cmd" -a $cmd_secs -gt 10 ]; then
+			if [ $gnuunits -gt 0 ]; then
+				cmd_time=$(units "$cmd_secs seconds" "centuries;years;months;weeks;days;hours;minutes;seconds" | \
+						sed -e 's/\ +/\,/g' -e s'/\t//')
+			else
+				cmd_time="$cmd_secs seconds"
+			fi
             if [ ! -z $SSH_TTY ] ; then
-                notify-send -i utilities-terminal -u low "$cmd_basename on `hostname` completed $cmdstat" "\"$cmd\" took $cmd_time seconds"; play -q $sndstat
+                notify-send -i utilities-terminal \
+						-u low "$cmd_basename on `hostname` completed $cmdstat" "\"$cmd\" took $cmd_time"; \
+						play -q $sndstat
             else
-                notify-send -i utilities-terminal -u low "$cmd_basename completed $cmdstat" "\"$cmd\" took $cmd_time seconds"; play -q $sndstat
+                notify-send -i utilities-terminal \
+						-u low "$cmd_basename completed $cmdstat" "\"$cmd\" took $cmd_time"; \
+						play -q $sndstat
             fi
         fi
         unset cmd
