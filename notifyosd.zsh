@@ -4,10 +4,19 @@ cmdignore=(htop tmux top vim)
 # set gt 0 to enable GNU units for time results
 gnuunits=0
 
+# Function taken from undistract-me, get the current window id
+function active_window_id () {
+    if [[ -n $DISPLAY ]] ; then
+        xprop -root _NET_ACTIVE_WINDOW | awk '{print $5}'
+        return
+    fi
+    echo nowindowid
+}
+
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
 	retval=$?
-    if [[ ${cmdignore[(r)$cmd_basename]} == $cmd_basename ]]; then
+    if [[ ${cmdignore[(r)$cmd_basename]} == $cmd_basename ]] || [[ "$cmd_active_win" == "$(active_window_id)" ]]; then
         return
     else
         if [ ! -z "$cmd" ]; then
@@ -52,6 +61,7 @@ function notifyosd-preexec() {
     cmd=$1
     cmd_basename=${${cmd:s/sudo //}[(ws: :)1]} 
     cmd_start=`date +%s`
+    cmd_active_win=$(active_window_id)
 }
 
 # make sure this plays nicely with any existing preexec
