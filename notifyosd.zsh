@@ -1,8 +1,11 @@
 # Default timeout is 10 seconds.
-LONG_RUNNING_COMMAND_TIMEOUT=${LONG_RUNNING_COMMAND_TIMEOUT:-10}
+NOTIFYOSD_LONG_RUNNING_COMMAND_TIMEOUT=${NOTIFYOSD_LONG_RUNNING_COMMAND_TIMEOUT:-10}
 
 # Set gt 0 to enable GNU units for time results. Disabled by default.
 NOTIFYOSD_GNUUNITS=${NOTIFYOSD_GNUUNITS:-0}
+
+# play sound on notification
+NOTIFYOSD_SOUND=${NOTIFYOSD_SOUND:-0}
 
 # commands to ignore
 cmdignore=(htop tmux top vim)
@@ -48,7 +51,7 @@ function notifyosd-precmd() {
             ((cmd_secs=$cmd_end - $cmd_start))
         fi
 
-        if [ ! -z "$cmd" -a $cmd_secs -gt ${LONG_RUNNING_COMMAND_TIMEOUT:-10} ] && is_window_unfocused; then
+        if [ ! -z "$cmd" -a $cmd_secs -gt ${NOTIFYOSD_LONG_RUNNING_COMMAND_TIMEOUT:-10} ] && is_window_unfocused; then
             if [ $retval -gt 0 ]; then
                 cmdstat="with warning"
                 sndstat="/usr/share/sounds/gnome/default/alerts/sonar.ogg"
@@ -68,17 +71,20 @@ function notifyosd-precmd() {
 
             tmux_info=''
             if active_tmux_window >/dev/null; then
-                tmux_info="(tmux: $cmd_tmux_session/$cmd_tmux_win)"
+                tmux_info=" (tmux: $cmd_tmux_session/$cmd_tmux_win)"
             fi
 
+            sshhost_info=''
             if [ ! -z $SSH_TTY ] ; then
-                notify-send -i utilities-terminal \
-                        -u $urgency "$cmd_basename on $(hostname) completed $cmdstat" "\"$cmd\" took $cmd_time $tmux_info"; \
-                        play -q $sndstat
-            else
-                notify-send -i utilities-terminal \
-                        -u $urgency "$cmd_basename completed $cmdstat" "\"$cmd\" took $cmd_time $tmux_info"; \
-                        play -q $sndstat
+                sshhost_info=" on $(hostname)"
+            fi
+
+            notify-send -i utilities-terminal \
+                    -u $urgency "$cmd_basename$sshhost_info completed $cmdstat" "\"$cmd\" took $cmd_time$tmux_info"
+
+            if [ "$NOTIFYOSD_SOUND" != "0" ]
+            then
+                play -q $sndstat
             fi
         fi
         unset cmd
