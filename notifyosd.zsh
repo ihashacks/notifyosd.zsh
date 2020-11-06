@@ -1,14 +1,17 @@
 # Default timeout is 10 seconds.
-NOTIFYOSD_LONG_RUNNING_COMMAND_TIMEOUT=${NOTIFYOSD_LONG_RUNNING_COMMAND_TIMEOUT:-10}
+LONG_RUNNING_COMMAND_TIMEOUT=${LONG_RUNNING_COMMAND_TIMEOUT:-10}
 
-# Set gt 0 to enable GNU units for time results. Disabled by default.
-NOTIFYOSD_GNUUNITS=${NOTIFYOSD_GNUUNITS:-0}
+# Set to 0 to disable human readable time format. Enabled by default.
+NOTIFYOSD_HUMAN=${NOTIFYOSD_HUMAN:-1}
 
-# play sound on notification
-NOTIFYOSD_SOUND=${NOTIFYOSD_SOUND:-0}
+# Play sound on notification. Disabled by default
+UDM_PLAY_SOUND=${UDM_PLAY_SOUND:-0}
 
-# commands to ignore
-cmdignore=(htop tmux top vim)
+# Commands to ignore
+if [ -z "$LONG_RUNNING_IGNORE_LIST" ]
+then
+    LONG_RUNNING_IGNORE_LIST=""
+fi
 
 # Figure out the active Tmux window
 function active_tmux_window() {
@@ -40,6 +43,23 @@ function is_window_unfocused() {
     [[ "$cmd_active_win" != $(active_window_id) ]] || [[ "$cmd_tmux_win" != $(active_tmux_window) ]]
 }
 
+# converts seconds to human readable time
+function tohuman {
+  local T=$1
+  local D=$((T/86400))
+  local H=$((T/3600%24))
+  local M=$((T/60%60))
+  local S=$((T%60))
+  local d=""
+  local h=""
+  local m=""
+  [[ $D > 0 ]] && d="${D}d "
+  [[ $H > 0 ]] && h="${H}h "
+  [[ $M > 0 ]] && m="${M}m "
+  echo "$d$h$m${S}s"
+}
+
+
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
     retval=$?
@@ -51,7 +71,7 @@ function notifyosd-precmd() {
             ((cmd_secs=$cmd_end - $cmd_start))
         fi
 
-        if [ ! -z "$cmd" -a $cmd_secs -gt ${NOTIFYOSD_LONG_RUNNING_COMMAND_TIMEOUT:-10} ] && is_window_unfocused; then
+        if [ ! -z "$cmd" -a $cmd_secs -gt ${LONG_RUNNING_COMMAND_TIMEOUT:-10} ] && is_window_unfocused; then
             if [ $retval -gt 0 ]; then
                 cmdstat="with warning"
                 sndstat="/usr/share/sounds/gnome/default/alerts/sonar.ogg"
@@ -62,9 +82,8 @@ function notifyosd-precmd() {
                 urgency="normal"
             fi
 
-            if [ "$NOTIFYOSD_GNUUNITS" -gt 0 ]; then
-                cmd_time=$(units "$cmd_secs seconds" "centuries;years;months;weeks;days;hours;minutes;seconds" | \
-                        sed -e 's/\ +/\,/g' -e s'/\t//')
+            if [ "$NOTIFYOSD_HUMAN" -gt 0 ]; then
+                cmd_time=$(tohuman $cmd_secs)
             else
                 cmd_time="$cmd_secs seconds"
             fi
@@ -82,7 +101,7 @@ function notifyosd-precmd() {
             notify-send -i utilities-terminal \
                     -u $urgency "$cmd_basename$sshhost_info completed $cmdstat" "\"$cmd\" took $cmd_time$tmux_info"
 
-            if [ "$NOTIFYOSD_SOUND" != "0" ]
+            if [ "$UDM_PLAY_SOUND" != "0" ]
             then
                 play -q $sndstat
             fi
