@@ -1,8 +1,11 @@
+# Default timeout is 10 seconds.
+LONG_RUNNING_COMMAND_TIMEOUT=${LONG_RUNNING_COMMAND_TIMEOUT:-10}
+
+# Set gt 0 to enable GNU units for time results. Disabled by default.
+NOTIFYOSD_GNUUNITS=${NOTIFYOSD_GNUUNITS:-0}
+
 # commands to ignore
 cmdignore=(htop tmux top vim)
-
-# set gt 0 to enable GNU units for time results
-gnuunits=0
 
 # Figure out the active Tmux window
 function active_tmux_window() {
@@ -45,7 +48,7 @@ function notifyosd-precmd() {
             ((cmd_secs=$cmd_end - $cmd_start))
         fi
 
-        if [ ! -z "$cmd" -a $cmd_secs -gt 10 ] && is_window_unfocused; then
+        if [ ! -z "$cmd" -a $cmd_secs -gt ${LONG_RUNNING_COMMAND_TIMEOUT:-10} ] && is_window_unfocused; then
             if [ $retval -gt 0 ]; then
                 cmdstat="with warning"
                 sndstat="/usr/share/sounds/gnome/default/alerts/sonar.ogg"
@@ -56,7 +59,7 @@ function notifyosd-precmd() {
                 urgency="normal"
             fi
 
-            if [ $gnuunits -gt 0 ]; then
+            if [ "$NOTIFYOSD_GNUUNITS" -gt 0 ]; then
                 cmd_time=$(units "$cmd_secs seconds" "centuries;years;months;weeks;days;hours;minutes;seconds" | \
                         sed -e 's/\ +/\,/g' -e s'/\t//')
             else
