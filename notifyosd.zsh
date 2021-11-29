@@ -8,10 +8,7 @@ NOTIFYOSD_HUMAN=${NOTIFYOSD_HUMAN:-1}
 UDM_PLAY_SOUND=${UDM_PLAY_SOUND:-0}
 
 # Commands to ignore
-if [ -z "$LONG_RUNNING_IGNORE_LIST" ]
-then
-    LONG_RUNNING_IGNORE_LIST=""
-fi
+# LONG_RUNNING_IGNORE_LIST=()
 
 # Figure out the active Tmux window
 function active_tmux_window() {
@@ -63,7 +60,7 @@ function tohuman {
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
     retval=$?
-    if [[ ${cmdignore[(r)$cmd_basename]} == $cmd_basename ]]; then
+    if [[ ${LONG_RUNNING_IGNORE_LIST[(r)$cmd_basename]} == $cmd_basename ]]; then
         return
     else
         if [ ! -z "$cmd" ]; then
