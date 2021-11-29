@@ -19,7 +19,7 @@ function active_tmux_window() {
         echo notmux
         return 1
     }
-    tmux display-message -p '#{window_name}'
+    tmux display-message -p '#{window_id}'
 }
 
 function active_tmux_session() {
@@ -27,7 +27,7 @@ function active_tmux_session() {
         echo notmux
         return 1
     }
-    tmux display-message -p '#{session_name}'
+    tmux display-message -p '#{session_id}'
 }
 
 # Function taken from undistract-me, get the current window id
@@ -90,7 +90,7 @@ function notifyosd-precmd() {
 
             tmux_info=''
             if active_tmux_window >/dev/null; then
-                tmux_info=" (tmux: $cmd_tmux_session/$cmd_tmux_win)"
+                tmux_info=" (tmux: $(tmux display-message -p '#{session_name}/#{window_name}'))"
             fi
 
             sshhost_info=''
