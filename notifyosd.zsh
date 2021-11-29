@@ -116,7 +116,7 @@ precmd_functions+=( notifyosd-precmd )
 # get command name and start the timer
 function notifyosd-preexec() {
     cmd=$1
-    cmd_basename=${${cmd:s/sudo //}[(ws: :)1]} 
+    cmd_basename=${${cmd:s/sudo //}[(ws: :)1]}
     cmd_start=$(date +%s)
     cmd_active_win=$(active_window_id)
     cmd_tmux_win=$(active_tmux_window)
