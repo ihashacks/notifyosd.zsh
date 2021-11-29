@@ -3,7 +3,7 @@
 Just like `undistract-me`, this notifies you when a long running command completes, but for zsh.
 
 ## Installation
-Just source notifyosd.zsh in your `~.zshrc`:
+Just source `notifyosd.zsh` in your `~.zshrc`:
 
 ```
 source path/to/notifyosd.zsh
@@ -18,6 +18,3 @@ Configuration is done with environment variables:
 * `LONG_RUNNING_IGNORE_LIST`: is a list of command that will be ignored by the script
 
 Note that a notification appears only if the terminal where the long command was running is not in focus.
-
-
-
