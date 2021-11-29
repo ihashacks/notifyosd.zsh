@@ -19,7 +19,7 @@ function active_tmux_window() {
         echo notmux
         return 1
     }
-    tmux display-message -p '#W'
+    tmux display-message -p '#{window_name}'
 }
 
 function active_tmux_session() {
@@ -27,7 +27,7 @@ function active_tmux_session() {
         echo notmux
         return 1
     }
-    tmux display-message -p '#S'
+    tmux display-message -p '#{session_name}'
 }
 
 # Function taken from undistract-me, get the current window id
