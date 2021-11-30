@@ -8,10 +8,7 @@ NOTIFYOSD_HUMAN=${NOTIFYOSD_HUMAN:-1}
 UDM_PLAY_SOUND=${UDM_PLAY_SOUND:-0}
 
 # Commands to ignore
-if [ -z "$LONG_RUNNING_IGNORE_LIST" ]
-then
-    LONG_RUNNING_IGNORE_LIST=""
-fi
+# LONG_RUNNING_IGNORE_LIST=()
 
 # Figure out the active Tmux window
 function active_tmux_window() {
@@ -19,7 +16,7 @@ function active_tmux_window() {
         echo notmux
         return 1
     }
-    tmux display-message -p '#W'
+    tmux display-message -p '#{window_id}'
 }
 
 function active_tmux_session() {
@@ -27,7 +24,7 @@ function active_tmux_session() {
         echo notmux
         return 1
     }
-    tmux display-message -p '#S'
+    tmux display-message -p '#{session_id}'
 }
 
 # Function taken from undistract-me, get the current window id
@@ -63,7 +60,7 @@ function tohuman {
 # end and compare timer, notify-send if needed
 function notifyosd-precmd() {
     retval=$?
-    if [[ ${cmdignore[(r)$cmd_basename]} == $cmd_basename ]]; then
+    if [[ ${LONG_RUNNING_IGNORE_LIST[(r)$cmd_basename]} == $cmd_basename ]]; then
         return
     else
         if [ ! -z "$cmd" ]; then
@@ -90,7 +87,7 @@ function notifyosd-precmd() {
 
             tmux_info=''
             if active_tmux_window >/dev/null; then
-                tmux_info=" (tmux: $cmd_tmux_session/$cmd_tmux_win)"
+                tmux_info=" (tmux: $(tmux display-message -p '#{session_name}/#{window_name}'))"
             fi
 
             sshhost_info=''
@@ -116,7 +113,7 @@ precmd_functions+=( notifyosd-precmd )
 # get command name and start the timer
 function notifyosd-preexec() {
     cmd=$1
-    cmd_basename=${${cmd:s/sudo //}[(ws: :)1]} 
+    cmd_basename=${${cmd:s/sudo //}[(ws: :)1]}
     cmd_start=$(date +%s)
     cmd_active_win=$(active_window_id)
     cmd_tmux_win=$(active_tmux_window)
