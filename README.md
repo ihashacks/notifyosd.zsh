@@ -3,7 +3,7 @@
 Just like `undistract-me`, this notifies you when a long running command completes, but for zsh.
 
 ## Installation
-Just source `notifyosd.zsh` in your `~.zshrc`:
+Just source `notifyosd.zsh` in your `~/.zshrc`:
 
 ```
 source path/to/notifyosd.zsh
